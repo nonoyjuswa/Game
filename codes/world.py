@@ -1,3 +1,4 @@
+# world.py
 import pygame
 from constants import *
 from player import Player
@@ -23,6 +24,7 @@ class World:
         self.enemies = [Enemy() for _ in range(ENEMY_NUMBER)]
         self.obstacles = Obstacle().rects
         self.world_surface = pygame.Surface((WORLD_WIDTH, WORLD_HEIGHT))
+        self.camera = Camera()
 
     def draw(self, screen, cam_x, cam_y):
         self.world_surface.fill('grey')

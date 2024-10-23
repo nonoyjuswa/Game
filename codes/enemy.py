@@ -1,6 +1,5 @@
 import pygame
-import math
-from random import choice, randint
+from random import randint
 from constants import *
 import math
 

@@ -6,18 +6,31 @@ class Player:
         self.rect = pygame.Rect(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2, PLAYER_SIZE, PLAYER_SIZE)
 
     def move(self, keys, obstacles):
-        old_position = self.rect.topleft
+        move_x, move_y = 0, 0
 
         if keys[pygame.K_a]:
-            self.rect.x -= PLAYER_SPEED
+            move_x -= PLAYER_SPEED
         if keys[pygame.K_d]:
-            self.rect.x += PLAYER_SPEED
+            move_x += PLAYER_SPEED
         if keys[pygame.K_w]:
-            self.rect.y -= PLAYER_SPEED
+            move_y -= PLAYER_SPEED
         if keys[pygame.K_s]:
-            self.rect.y += PLAYER_SPEED
+            move_y += PLAYER_SPEED
 
-        # Collision detection
+        # Normalize movement vector
+        length = (move_x ** 2 + move_y ** 2) ** 0.5
+        if length > 0:
+            move_x /= length
+            move_y /= length
+            move_x *= PLAYER_SPEED
+            move_y *= PLAYER_SPEED
+
+        old_position = self.rect.topleft
+
+        # Move player
+        self.rect.x += move_x
+        self.rect.y += move_y
+
         if self.check_collisions(obstacles):
             self.rect.topleft = old_position
 
