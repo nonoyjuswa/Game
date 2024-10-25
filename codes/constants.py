@@ -1,10 +1,11 @@
 # Constants for screen and world size
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
-WORLD_WIDTH, WORLD_HEIGHT = 1560, 1440
+WORLD_WIDTH, WORLD_HEIGHT = 2560, 2440
 
 # Player settings
-PLAYER_SPEED = 5
+PLAYER_SPEED = 3
 PLAYER_SIZE = 50
+PLAYER_MAX_HEALTH = 1000  # Maximum health for the player
 
 # Enemy settings
 ENEMY_SIZE = 50

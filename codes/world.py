@@ -1,4 +1,3 @@
-# world.py
 import pygame
 from constants import *
 from player import Player
@@ -27,9 +26,15 @@ class World:
         self.camera = Camera()
 
     def draw(self, screen, cam_x, cam_y):
+        # Draw the background color (outside the world)
+        screen.fill('blue')  # Change 'blue' to your desired border color
+
+        # Draw the world surface
         self.world_surface.fill('grey')
 
+        # Draw player and its footprints
         pygame.draw.rect(self.world_surface, 'green', self.player.rect)
+        self.player.draw_footprints(self.world_surface)  # Draw footprints
 
         for enemy in self.enemies:
             pygame.draw.circle(self.world_surface, 'brown', enemy.rect.center, ENEMY_VISION_RADIUS, 1)
@@ -38,14 +43,19 @@ class World:
         for obstacle in self.obstacles:
             pygame.draw.rect(self.world_surface, 'white', obstacle)
 
+        # Blit the world surface onto the screen
         screen.blit(self.world_surface, (-cam_x, -cam_y))
+
+        # Draw health bar and icon on top of the world
+        self.player.draw_health(screen)  # Draw health bar at the top left
 
     def update_enemies(self):
         for enemy in self.enemies:
             enemy.update_behavior(self.player, self.obstacles)
 
     def handle_player_movement(self, keys):
-        self.player.move(keys, self.obstacles)
+        self.player.move(keys, self.obstacles, self.enemies)
+
 
 class Camera:
     @staticmethod
