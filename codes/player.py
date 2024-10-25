@@ -7,6 +7,7 @@ class Player:
         self.footprints = []  # List to store footprints
         self.footprint_lifetime = 2000  # Lifetime of footprints in milliseconds
         self.health = PLAYER_MAX_HEALTH  # Initialize health to max health
+        self.knockback_velocity = (0, 0) # Initialize knockback velocity
 
     def move(self, keys, obstacles, enemies):
         move_x, move_y = 0, 0
@@ -28,18 +29,33 @@ class Player:
             move_x *= PLAYER_SPEED
             move_y *= PLAYER_SPEED
 
+        # Store old position for reverting
         old_position = self.rect.topleft
 
-        # Move player
-        self.rect.x += move_x
-        self.rect.y += move_y
+        # Check for potential collision with enemies before moving
+        collision_with_enemy = self.check_enemy_collisions(enemies)
 
-        # Check collisions with obstacles
-        if self.check_collisions(obstacles):
-            self.rect.topleft = old_position
+        # Move player if no collision
+        if not collision_with_enemy:
+            self.rect.x += move_x  # Move player on the x-axis
+            if not self.check_collisions(obstacles):  # Check obstacles after moving x
+                self.rect.y += move_y  # Move player on the y-axis
+                if self.check_collisions(obstacles):  # Check obstacles after moving y
+                    self.rect.y -= move_y  # Revert y movement if collision detected
+        else:
+            self.rect.topleft = old_position  # Revert to old position if collision with enemy
 
-        # Check collisions with enemies
-        self.check_enemy_collisions(enemies)
+        # Apply knockback
+        if self.knockback_velocity != (0, 0):
+            self.rect.x += self.knockback_velocity[0] * 0.5  # Slow down the knockback effect (adjust multiplier)
+            self.rect.y += self.knockback_velocity[1] * 0.5
+
+            # Gradually reduce knockback velocity to zero
+            self.knockback_velocity = (
+                self.knockback_velocity[0] * 0.9, self.knockback_velocity[1] * 0.9)  # Decay knockback over time
+            if abs(self.knockback_velocity[0]) < 1 and abs(
+                    self.knockback_velocity[1]) < 1:  # Stop knockback when negligible
+                self.knockback_velocity = (0, 0)
 
         # Add a footprint when the player moves
         if move_x != 0 or move_y != 0:
@@ -56,11 +72,6 @@ class Player:
     def remove_old_footprints(self):
         current_time = pygame.time.get_ticks()
         self.footprints = [fp for fp in self.footprints if current_time - fp[1] < self.footprint_lifetime]
-
-    def draw_footprints(self, screen):
-        for footprint in self.footprints:
-            position = footprint[0]
-            pygame.draw.circle(screen, 'blue', (int(position[0]), int(position[1])), 5)  # Draw footprint circle
 
     def draw_health(self, screen):
         # Define positions and dimensions
@@ -88,5 +99,40 @@ class Player:
     def check_enemy_collisions(self, enemies):
         for enemy in enemies:
             if self.rect.colliderect(enemy.rect):
-                self.health -= 1  # Decrease health by 1
-                print("Player hit! Current health:", self.health)
+                self.health -= 1  # Decrease health by 1 when colliding with an enemy
+
+                # Calculate the overlap in both x and y directions
+                overlap_x = (self.rect.right - enemy.rect.left) if self.rect.centerx < enemy.rect.centerx else (
+                            enemy.rect.right - self.rect.left)
+                overlap_y = (self.rect.bottom - enemy.rect.top) if self.rect.centery < enemy.rect.centery else (
+                            enemy.rect.bottom - self.rect.top)
+
+                # Determine the direction of the knockback based on overlap
+                if abs(overlap_x) < abs(overlap_y):  # Horizontal collision
+                    if self.rect.centerx < enemy.rect.centerx:  # Player is to the left of the enemy
+                        self.rect.right = enemy.rect.left  # Move player to the left of the enemy
+                        knockback_x = -20  # Knock back to the left
+                    else:  # Player is to the right of the enemy
+                        self.rect.left = enemy.rect.right  # Move player to the right of the enemy
+                        knockback_x = 20  # Knock back to the right
+                    knockback_y = 0  # No vertical knockback
+                else:  # Vertical collision
+                    if self.rect.centery < enemy.rect.centery:  # Player is above the enemy
+                        self.rect.bottom = enemy.rect.top  # Move player above the enemy
+                        knockback_y = -20  # Knock back up
+                    else:  # Player is below the enemy
+                        self.rect.top = enemy.rect.bottom  # Move player below the enemy
+                        knockback_y = 20  # Knock back down
+                    knockback_x = 0  # No horizontal knockback
+
+                # Adjust player's position based on knockback
+                self.rect.x += knockback_x
+                self.rect.y += knockback_y
+
+                # Store knockback velocity
+                self.knockback_velocity = (knockback_x, knockback_y)
+
+                return True  # Collision detected
+
+        return False  # No collision detected
+

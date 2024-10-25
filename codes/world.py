@@ -32,9 +32,8 @@ class World:
         # Draw the world surface
         self.world_surface.fill('grey')
 
-        # Draw player and its footprints
+        # Draw player
         pygame.draw.rect(self.world_surface, 'green', self.player.rect)
-        self.player.draw_footprints(self.world_surface)  # Draw footprints
 
         for enemy in self.enemies:
             pygame.draw.circle(self.world_surface, 'brown', enemy.rect.center, ENEMY_VISION_RADIUS, 1)

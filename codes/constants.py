@@ -5,7 +5,7 @@ WORLD_WIDTH, WORLD_HEIGHT = 2560, 2440
 # Player settings
 PLAYER_SPEED = 3
 PLAYER_SIZE = 50
-PLAYER_MAX_HEALTH = 1000  # Maximum health for the player
+PLAYER_MAX_HEALTH = 100  # Maximum health for the player
 
 # Enemy settings
 ENEMY_SIZE = 50
@@ -14,5 +14,5 @@ ENEMY_VISION_RADIUS = 300
 
 # Game settings
 NUMBER_OF_OBSTACLES = 25
-ENEMY_NUMBER = 2
+ENEMY_NUMBER = 3
 COOLDOWN_PERIOD = 1500
