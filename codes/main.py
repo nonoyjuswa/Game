@@ -13,32 +13,34 @@ class Game:
 
     def run(self):
         while self.running:
+            # ang button sang exit para mag exit
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
 
-            # Handle player movement
+            # mga keyboard keys para sa movement
             keys = pygame.key.get_pressed()
             self.world.handle_player_movement(keys)
 
-            # Update enemy behavior
+            # gina update ang enemy AI
             self.world.update_enemies()
 
-            # Calculate camera movement
+            #camera movement or ang screen nga ga sunod sa player
             cam_x, cam_y = self.world.camera.move(self.world.player.rect.topleft)
 
-            # Draw everything
+            # na butang ang tanantanan
             self.world.draw(self.display_screen, cam_x, cam_y)
 
-            # Update display
+            # na update ang bilog nga world
             pygame.display.flip()
 
-            # Cap frame rate
+            # frame rate
             self.clock.tick(60)
 
         pygame.quit()
         sys.exit()
 
+# para sa pag run, ma run sya if ara sa main ang naopen
 if __name__ == "__main__":
     game = Game()
     game.run()

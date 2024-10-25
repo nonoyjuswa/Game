@@ -1,18 +1,18 @@
-# Constants for screen and world size
+# world size
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
 WORLD_WIDTH, WORLD_HEIGHT = 2560, 2440
 
-# Player settings
+# player settings
 PLAYER_SPEED = 3
 PLAYER_SIZE = 50
 PLAYER_MAX_HEALTH = 100  # Maximum health for the player
 
-# Enemy settings
+# enemy settings
 ENEMY_SIZE = 50
 ENEMY_SPEED = 2
 ENEMY_VISION_RADIUS = 300
 
-# Game settings
+# game settings
 NUMBER_OF_OBSTACLES = 25
 ENEMY_NUMBER = 3
 COOLDOWN_PERIOD = 1500

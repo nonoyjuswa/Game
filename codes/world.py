@@ -4,6 +4,7 @@ from player import Player
 from enemy import Enemy
 from random import randint
 
+# pag himo sang mga obstacles 
 class Obstacle:
     def __init__(self):
         self.rects = self.create_obstacles(NUMBER_OF_OBSTACLES)
@@ -26,36 +27,40 @@ class World:
         self.camera = Camera()
 
     def draw(self, screen, cam_x, cam_y):
-        # Draw the background color (outside the world)
-        screen.fill('blue')  # Change 'blue' to your desired border color
+        # color sang outside world or ang border
+        screen.fill('blue') 
 
-        # Draw the world surface
+        # color sang world
         self.world_surface.fill('grey')
 
-        # Draw player
+        # gina draw or butang ang player
         pygame.draw.rect(self.world_surface, 'green', self.player.rect)
 
+        # gina butang day enemy randomly sa bilog nga world kung pila sila
         for enemy in self.enemies:
             pygame.draw.circle(self.world_surface, 'brown', enemy.rect.center, ENEMY_VISION_RADIUS, 1)
             pygame.draw.rect(self.world_surface, 'red', enemy.rect)
 
+        # gina butang randomly si obstacles sa world
         for obstacle in self.obstacles:
             pygame.draw.rect(self.world_surface, 'white', obstacle)
 
-        # Blit the world surface onto the screen
+        # gina butang si world sa screen
         screen.blit(self.world_surface, (-cam_x, -cam_y))
 
-        # Draw health bar and icon on top of the world
-        self.player.draw_health(screen)  # Draw health bar at the top left
+        # na butang ang healthbar
+        self.player.draw_health(screen)
 
+    # gina update ang mga enemy individually
     def update_enemies(self):
         for enemy in self.enemies:
             enemy.update_behavior(self.player, self.obstacles)
 
+    # movement ka player
     def handle_player_movement(self, keys):
         self.player.move(keys, self.obstacles, self.enemies)
 
-
+# gina sunod si player
 class Camera:
     @staticmethod
     def move(player_pos):
