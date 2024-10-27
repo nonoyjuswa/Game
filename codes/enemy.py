@@ -69,22 +69,31 @@ class Enemy:
         if distance > 0:
             dx, dy = dx / distance, dy / distance
             self.rect.x += dx * ENEMY_SPEED
-            self.rect.y += dy * ENEMY_SPEED
+            if self.check_collisions(obstacles):
+                self.rect.x = old_position[0]  # Reset x if there's a collision
 
-        # para hindi mag collide
-        if self.check_collisions(obstacles) or self.rect.colliderect(player.rect):
-            self.rect.topleft = old_position 
+            self.rect.y += dy * ENEMY_SPEED
+            if self.check_collisions(obstacles):
+                self.rect.y = old_position[1]  # Reset y if there's a collision
+
+        # Handle potential collision with player
+        if self.rect.colliderect(player.rect):
+            self.rect.topleft = old_position
             self.try_alternate_path(dx, dy, obstacles, player)
 
     # para nadi sa mga obstacle kulang pani
     def try_alternate_path(self, dx, dy, obstacles, player):
+        original_position = self.rect.topleft
+
+        # Move only along the y-axis and check for collisions
         self.rect.y += dy * ENEMY_SPEED
         if self.check_collisions(obstacles) or self.rect.colliderect(player.rect):
-            self.rect.y -= dy * ENEMY_SPEED 
+            self.rect.y = original_position[1]  # Reset y if collision
 
+        # Move only along the x-axis and check for collisions
         self.rect.x += dx * ENEMY_SPEED
         if self.check_collisions(obstacles) or self.rect.colliderect(player.rect):
-            self.rect.x -= dx * ENEMY_SPEED 
+            self.rect.x = original_position[0]  # Reset x if collision
 
     def check_collisions(self, obstacles):
         return any(self.rect.colliderect(obstacle) for obstacle in obstacles)

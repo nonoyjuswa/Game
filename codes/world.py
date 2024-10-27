@@ -4,7 +4,7 @@ from player import Player
 from enemy import Enemy
 from random import randint
 
-# pag himo sang mga obstacles 
+# pag himo sang mga obstacles
 class Obstacle:
     def __init__(self):
         self.rects = self.create_obstacles(NUMBER_OF_OBSTACLES)
@@ -28,7 +28,7 @@ class World:
 
     def draw(self, screen, cam_x, cam_y):
         # color sang outside world or ang border
-        screen.fill('blue') 
+        screen.fill('blue')
 
         # color sang world
         self.world_surface.fill('grey')

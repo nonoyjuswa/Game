@@ -1,15 +1,16 @@
 import pygame
 from constants import *
 
+
 class Player:
     def __init__(self):
         self.rect = pygame.Rect(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2, PLAYER_SIZE, PLAYER_SIZE)
         self.footprints = []  # diri gina butang ang mga footprint
         self.footprint_lifetime = 2000  # kung pila ka seconds madula ang footprint, miliseconds
         self.health = PLAYER_MAX_HEALTH  # max health sang player, initialize lang ni
-        self.knockback_velocity = (0, 0) # initialize ang knockback
+        self.knockback_velocity = (0, 0)  # initialize ang knockback
 
-    def move(self, keys, obstacles, enemies): # movements....
+    def move(self, keys, obstacles, enemies):  # movements....
         move_x, move_y = 0, 0
 
         # WSAD movement
@@ -30,36 +31,31 @@ class Player:
             move_x *= PLAYER_SPEED
             move_y *= PLAYER_SPEED
 
-        # na store ang last nga position para sa collisions
-        old_position = self.rect.topleft
-
         # na check ang mga collisions sa enemy
-        collision_with_enemy = self.check_enemy_collisions(enemies)
+        self.check_enemy_collisions(enemies)
 
-        if not collision_with_enemy:
-            self.rect.x += move_x 
-            if not self.check_collisions(obstacles): 
-                self.rect.y += move_y  
-                if self.check_collisions(obstacles): 
-                    self.rect.y -= move_y  
-        else:
-            self.rect.topleft = old_position 
+        self.rect.x += move_x
+        self.handle_collisions(obstacles, axis='x')
 
-        # diri nadi si knockback nga velocity ambot kung ano na hahahahaha, gin chatgpt ko nadi:
+        # Move vertically and check for collisions
+        self.rect.y += move_y
+        self.handle_collisions(obstacles, axis='y')
+
+            # diri nadi si knockback nga velocity ambot kung ano na hahahahaha, gin chatgpt ko nadi:
         if self.knockback_velocity != (0, 0):
-            self.rect.x += self.knockback_velocity[0] * 0.5  
+            self.rect.x += self.knockback_velocity[0] * 0.5
             self.rect.y += self.knockback_velocity[1] * 0.5
-            
+
             self.knockback_velocity = (
-                self.knockback_velocity[0] * 0.9, self.knockback_velocity[1] * 0.9)  
+                self.knockback_velocity[0] * 0.9, self.knockback_velocity[1] * 0.9)
             if abs(self.knockback_velocity[0]) < 1 and abs(
-                    self.knockback_velocity[1]) < 1: 
+                    self.knockback_velocity[1]) < 1:
                 self.knockback_velocity = (0, 0)
 
         # footprint!! para sundan ni enemy, hindi mo lang galing makita
         if move_x != 0 or move_y != 0:
             footprint_position = (self.rect.centerx, self.rect.centery)
-            self.footprints.append((footprint_position, pygame.time.get_ticks()))  #na append didto sa babaw nga list
+            self.footprints.append((footprint_position, pygame.time.get_ticks()))  # na append didto sa babaw nga list
 
         # gina remove ang footprint after certain time
         self.remove_old_footprints()
@@ -75,9 +71,9 @@ class Player:
 
     # Health Icon or health bar
     def draw_health(self, screen):
-        icon_size = 40 
+        icon_size = 40
         health_bar_width = 100
-        health_bar_height = 10 
+        health_bar_height = 10
         icon_position = (10, 10)
         health_bar_position = (10, icon_position[1] + icon_size + 5)
 
@@ -88,14 +84,25 @@ class Player:
         pygame.draw.rect(screen, 'red', (*health_bar_position, health_bar_width, health_bar_height))
         health_percentage = self.health / PLAYER_MAX_HEALTH
         # muni naman ang current health
-        pygame.draw.rect(screen, 'green', (*health_bar_position, health_bar_width * health_percentage, health_bar_height))  # Health bar
+        pygame.draw.rect(screen, 'green',
+                         (*health_bar_position, health_bar_width * health_percentage, health_bar_height))  # Health bar
 
     # na check if may collisions sa mga obstacles
-    def check_collisions(self, obstacles):
+    def handle_collisions(self, obstacles, axis):
         for obstacle in obstacles:
-            if self.rect.colliderect(obstacle):
-                return True
-        return False
+            if not self.rect.colliderect(obstacle):
+                continue  # Skip to the next obstacle if no collision
+
+            if axis == 'x':  # Horizontal collision
+                if self.rect.centerx < obstacle.centerx:  # Player is to the left
+                    self.rect.right = obstacle.left  # Push player out to the left
+                else:  # Player is to the right
+                    self.rect.left = obstacle.right  # Push player out to the right
+            elif axis == 'y':  # Vertical collision
+                if self.rect.centery < obstacle.centery:  # Player is above
+                    self.rect.bottom = obstacle.top  # Push player up
+                else:  # Player is below
+                    self.rect.top = obstacle.bottom  # Push player down
 
     # na check if may collisions sa enemy
     def check_enemy_collisions(self, enemies):
@@ -105,36 +112,33 @@ class Player:
 
                 # CHatgpt let's goo
                 overlap_x = (self.rect.right - enemy.rect.left) if self.rect.centerx < enemy.rect.centerx else (
-                            enemy.rect.right - self.rect.left)
+                        enemy.rect.right - self.rect.left)
                 overlap_y = (self.rect.bottom - enemy.rect.top) if self.rect.centery < enemy.rect.centery else (
-                            enemy.rect.bottom - self.rect.top)
+                        enemy.rect.bottom - self.rect.top)
 
                 # diri nadi ang knockback, for example sa babaw nag collide kay enemy, ma knockback si player pa babaw
-                if abs(overlap_x) < abs(overlap_y): 
-                    if self.rect.centerx < enemy.rect.centerx:  
+                if abs(overlap_x) < abs(overlap_y):
+                    if self.rect.centerx < enemy.rect.centerx:
                         self.rect.right = enemy.rect.left
-                        knockback_x = -20 
-                    else:  
-                        self.rect.left = enemy.rect.right 
-                        knockback_x = 20  
-                    knockback_y = 0  
-                else:  
+                        knockback_x = -8
+                    else:
+                        self.rect.left = enemy.rect.right
+                        knockback_x = 8
+                    knockback_y = 0
+                else:
                     if self.rect.centery < enemy.rect.centery:
-                        self.rect.bottom = enemy.rect.top 
-                        knockback_y = -20 
-                    else: 
-                        self.rect.top = enemy.rect.bottom 
-                        knockback_y = 20  
-                    knockback_x = 0  
+                        self.rect.bottom = enemy.rect.top
+                        knockback_y = -8
+                    else:
+                        self.rect.top = enemy.rect.bottom
+                        knockback_y = 8
+                    knockback_x = 0
 
-                
                 self.rect.x += knockback_x
                 self.rect.y += knockback_y
 
-                
                 self.knockback_velocity = (knockback_x, knockback_y)
 
-                return True  
+                return True
 
-        return False  
-    
+        return False
