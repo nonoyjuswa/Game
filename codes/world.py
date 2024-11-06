@@ -12,7 +12,7 @@ class Obstacle:
     def create_obstacles(self, num):
         obstacles = []
         for _ in range(num):
-            width, height = randint(30, 80), randint(30, 80)
+            width, height = randint(50, 80), randint(50, 80)
             x = randint(0, WORLD_WIDTH - width)
             y = randint(0, WORLD_HEIGHT - height)
             obstacles.append(pygame.Rect(x, y, width, height))
